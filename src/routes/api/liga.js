@@ -7,8 +7,6 @@ Router.post('/',  controller.cadastro);
 
 Router.get('/listarTodasLigas',  controller.listarTodasLigas);
 
-Router.get('/listarLigasAdms/:idUsuarioAdmLiga',  controller.listarLigasAdms);
-
-Router.delete('/excluirLiga/:anoTemporada/:idRodada/:idUsuarioAdmLiga/:idLiga',   controller.excluirLiga);
+Router.delete('/excluirLiga/:id_liga',   controller.excluirLiga);
 
 module.exports = Router;

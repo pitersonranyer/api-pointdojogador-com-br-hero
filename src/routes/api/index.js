@@ -1,115 +1,68 @@
 const Router = require('express').Router();
 
-const usuariosRouter = require('./usuarios');
-const usuarioComumRouter = require('./usuarioComum');
-const timeUsuarioCartolaRouter = require('./timeUsuarioCartola');
-const rodadaCartolaRouter = require('./rodadaCartola');
-const timeRodadaCartolaRouter = require('./timeRodadaCartola');
-const timesRouter = require('./times');
-const cartolaAPIrouter = require('./cartolaAPI');
 const authRouter = require('./auth');
+
 const ligaRouter = require('./liga');
-const timeLigaRouter = require('./timeLiga');
-
-
-const competicaoCartolaRouter = require('./competicaoCartola');
-const bilheteCompeticaoCartolaRouter = require('./bilheteCompeticaoCartola');
-const timeBilheteCompeticaoCartolaRouter = require('./timeBilheteCompeticaoCartola');
-const historicoTimeUsuarioRouter = require('./historicoTimeUsuario')
-const pontuacaoTimeRodadaRouter = require('./pontuacaoTimeRodada')
-
+const competicaoRouter = require('./competicao');
+const bilheteRouter = require('./bilhete');
+const timeCompeticaoRouter = require('./time_competicao');
+const timeCartolaRouter = require('./time_cartola');
+const dadoMestreCartolaRouter = require('./dadoMestreCartola');
 const atualizarParciaisRouter = require('./atualizarParciais')
 
 
+
 const endpoints = {
-  message: 'essa é a API da nossa rede social!',
+  message: 'API point do jogador!',
   endpoints: {
     usuarios: {
       caminho: '/usuarios'
-    },
-    times: {
-      caminho: '/times'
-    },
-    usuarioComum: {
-      caminho: '/usuarioComum'
-    },
-    cartolaAPI: {
-      caminho: '/cartolaAPI'
-    },
-    timeUsuarioCartola: {
-      caminho: '/timeUsuarioCartola'
-    },
-    rodadaCartola: {
-      caminho: '/rodadaCartola'
-    },
-
-    liga: {
-      caminho: '/liga'
-    },
-
-    timeLiga: {
-      caminho: '/timeLiga'
-    },
-    timeRodadaCartola: {
-      caminho: '/timeRodadaCartola'
     },
     autenticacao: {
       caminho: '/auth'
     },
 
 
-
-
-    competicaoCartola: {
-      caminho: '/competicaoCartola'
-    },
-    bilheteCompeticaoCartola: {
-      caminho: '/bilheteCompeticaoCartola'
-    },
-    timeBilheteCompeticaoCartola: {
-      caminho: '/timeBilheteCompeticaoCartola'
-    },
-    historicoTimeUsuario: {
-      caminho: '/historicoTimeUsuario'
+    liga: {
+      caminho: '/liga'
     },
 
-    pontuacaoTimeRodada: {
-      caminho: '/pontuacaoTimeRodada'
+    competicao: {
+      caminho: '/competicao'
+    },
+
+    bilhete: {
+      caminho: '/bilhete'
+    },
+
+    time_competicao: {
+      caminho: '/time_competicao'
+    },
+
+    time_cartola: {
+      caminho: '/time_cartola'
+    },
+
+    dadoMestreCartola: {
+      caminho: '/dadoMestreCartola'
     },
 
     atualizarParciais: {
       caminho: '/atualizarParciais'
     },
-
-    
-
-
-    
+   
   }
 };
 
 Router.get('/', (req, res, next) => res.json(endpoints));
-Router.use('/usuarios', usuariosRouter);
-Router.use('/times', timesRouter);
-Router.use('/usuarioComum', usuarioComumRouter);
-Router.use('/cartolaAPI', cartolaAPIrouter);
-Router.use('/timeUsuarioCartola', timeUsuarioCartolaRouter);
-Router.use('/rodadaCartola', rodadaCartolaRouter);
-Router.use('/timeRodadaCartola', timeRodadaCartolaRouter);
-Router.use('/liga', ligaRouter);
-Router.use('/timeLiga', timeLigaRouter);
 Router.use('/auth', authRouter);
 
-
-Router.use('/competicaoCartola', competicaoCartolaRouter);
-Router.use('/bilheteCompeticaoCartola', bilheteCompeticaoCartolaRouter);
-Router.use('/timeBilheteCompeticaoCartola', timeBilheteCompeticaoCartolaRouter);
-Router.use('/historicoTimeUsuario', historicoTimeUsuarioRouter);
-
-Router.use('/pontuacaoTimeRodada', pontuacaoTimeRodadaRouter);
-
+Router.use('/liga', ligaRouter);
+Router.use('/competicao', competicaoRouter);
+Router.use('/bilhete', bilheteRouter);
+Router.use('/time_competicao', timeCompeticaoRouter);
+Router.use('/time_cartola', timeCartolaRouter);
+Router.use('/dadoMestreCartola', dadoMestreCartolaRouter);
 Router.use('/atualizarParciais', atualizarParciaisRouter);
-
-
 
 module.exports = Router;

@@ -2,44 +2,22 @@ const Sequelize = require("sequelize");
 const sequelize = require("../database/database");
 
 const Liga = sequelize.define("liga", {
-
-  idLiga: {  
+  id_liga: {
+    allowNull: false,
     primaryKey: true,
-    allowNull: false,
     type: Sequelize.INTEGER
   },
 
-  anoTemporada: { 
-    allowNull: false,
-    type: Sequelize.INTEGER
-  },
-
-  idRodada: {
-    allowNull: false,
-    type: Sequelize.INTEGER
-  },
-
-  idUsuarioAdmLiga: {
-    allowNull: false,
-    type: Sequelize.INTEGER
-  },
-
-  nomeLiga: {
+  id_usuario: {
     allowNull: true,
-    type: Sequelize.STRING(100)
+    type: Sequelize.INTEGER
   },
-
-  valorLiga: {
-    allowNull: true,
-    type: Sequelize.DECIMAL(15, 2)
+  
+  nome_liga: {
+    allowNull: false,
+    type: Sequelize.STRING(100) 
   },
-
-  // Rodada, Mensal, Anual
-  tipoLiga: {
-    allowNull: true,
-    type: Sequelize.STRING(30)
-  },
-
+ 
 },
 
   {

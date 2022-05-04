@@ -1,35 +1,17 @@
 const {
-  getScoutAtletas , putAtualizarParciais } = require('../repository/atualizarParciais');
-
-
-
+  atualizarAtletaPontuado } = require('../repository/atualizarParciais');
 
 const atualizarParciais = async (req, res, next) => {
-  const nrSequencialRodadaCartola = req.params.nrSequencialRodadaCartola;
-  const rodada_atual = req.params.rodada_atual
+  
+  const numero_rodada = req.params.numero_rodada
 
-  return putAtualizarParciais(nrSequencialRodadaCartola, rodada_atual)
-
-    .then(atu => res.json(atu))
-    .catch(err => next(err));
-};
-
-const listarScoutAtletas = async (req, res, next) => {
-  const atleta_id = req.params.atleta_id;
-  const nrRodada = req.params.nrRodada;
-
-  return getScoutAtletas(atleta_id, nrRodada)
+  return atualizarAtletaPontuado(numero_rodada)
 
     .then(atu => res.json(atu))
     .catch(err => next(err));
 };
-
-
 
 
 module.exports = {
-
-  atualizarParciais,
-  listarScoutAtletas
-
+  atualizarParciais
 };

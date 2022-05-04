@@ -37,16 +37,47 @@ const recuperarAtletasPontuados = async () => {
   var arrayAtletasPontuados = [];
 
 
-  dadosAtletas = await unirest.get(url)
-    .header(
-      "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
-      "Accept", "application/json, text/plain, */*",
-      "Referer", "https://cartolafc.globo.com/",
-      "Origin", "https://cartolafc.globo.com/",
-      "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
-    )
+  //  dadosAtletas = await unirest.get(url)
+  //    .header(
+  //      "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+  //      "Accept", "application/json, text/plain, */*",
+  //      "Referer", "https://cartolafc.globo.com/",
+  //      "Origin", "https://cartolafc.globo.com/",
+  //      "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
+  //    )
 
-  if (dadosAtletas.body) {
+
+  data = fs.readFileSync('./src/model/pontuados.json', 'utf8');
+  const dadosAtletas = JSON.parse(data);
+
+  
+
+  if (dadosAtletas) {
+
+    Object.keys(dadosAtletas.atletas).forEach(atleta_id => {
+      const atleta = {
+        atleta_id: atleta_id,
+        apelido: dadosAtletas.atletas[atleta_id].apelido,
+        pontuacao: dadosAtletas.atletas[atleta_id].pontuacao,
+        foto: dadosAtletas.atletas[atleta_id].foto,
+        posicao_id: dadosAtletas.atletas[atleta_id].posicao_id,
+        clube_id: dadosAtletas.atletas[atleta_id].clube_id,
+        entrou_em_campo: dadosAtletas.atletas[atleta_id].entrou_em_campo,
+        scout: dadosAtletas.atletas[atleta_id].scout,
+
+      };
+
+      atleta.foto = atleta.foto.replace('FORMATO', '140x140');
+      arrayAtletasPontuados.push(atleta);
+
+    });
+
+    return arrayAtletasPontuados;
+
+  }
+
+
+  /* if (dadosAtletas.body) {
 
     Object.keys(dadosAtletas.body.atletas).forEach(atleta_id => {
       const atleta = {
@@ -68,7 +99,7 @@ const recuperarAtletasPontuados = async () => {
 
     return arrayAtletasPontuados;
 
-  }
+  } */
 
 }
 
@@ -81,17 +112,38 @@ const recuperarSituacaoPartidas = async () => {
   partidasArray = [];
   escudoTime = [];
 
-  resultJson = await unirest.get(url)
-    .header(
-      "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
-      "Accept", "application/json, text/plain, */*",
-      "Referer", "https://cartolafc.globo.com/",
-      "Origin", "https://cartolafc.globo.com/",
-      "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
-    )
+  // consultarTimeCartola
+
+  // resultJson = await unirest.get(url)
+  //   .header(
+  //     "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+  //    "Accept", "application/json, text/plain, */*",
+  //     "Referer", "https://cartolafc.globo.com/",
+  //     "Origin", "https://cartolafc.globo.com/",
+  //     "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
+  //   )
+
+  data = fs.readFileSync('./src/model/partidas.json', 'utf8');
+  const resultJson = JSON.parse(data);
+
+  if (resultJson) {
+
+    partidasArray = resultJson.partidas;
+
+    Object.keys(resultJson.clubes).forEach(id => {
+      const clubes = {
+        id: id,
+        nome: resultJson.clubes[id].nome,
+        abreviacao: resultJson.clubes[id].abreviacao,
+        escudos: resultJson.clubes[id].escudos,
+        nome_fantasia: resultJson.clubes[id].nome_fantasia
+      };
+      clubesArray.push(clubes);
+
+    });
 
 
-  if (resultJson.body) {
+  /* if (resultJson.body) {
 
     partidasArray = resultJson.body.partidas;
 
@@ -105,7 +157,7 @@ const recuperarSituacaoPartidas = async () => {
       };
       clubesArray.push(clubes);
 
-    });
+    }); */
 
     // Juntar array de times com array de partidas
     for (let i = 0; i < partidasArray.length; i++) {
