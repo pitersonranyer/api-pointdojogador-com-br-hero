@@ -1,7 +1,8 @@
 const Router = require('express').Router();
-
 const authRouter = require('./auth');
+const usuariosRouter = require('./usuarios');
 
+const cartolaAPIrouter = require('./cartolaAPI');
 const ligaRouter = require('./liga');
 const competicaoRouter = require('./competicao');
 const bilheteRouter = require('./bilhete');
@@ -22,7 +23,10 @@ const endpoints = {
       caminho: '/auth'
     },
 
-
+    cartolaAPI: {
+      caminho: '/cartolaAPI'
+    },
+    
     liga: {
       caminho: '/liga'
     },
@@ -54,9 +58,11 @@ const endpoints = {
   }
 };
 
+
+Router.use('/cartolaAPI', cartolaAPIrouter);
 Router.get('/', (req, res, next) => res.json(endpoints));
 Router.use('/auth', authRouter);
-
+Router.use('/usuarios', usuariosRouter);
 Router.use('/liga', ligaRouter);
 Router.use('/competicao', competicaoRouter);
 Router.use('/bilhete', bilheteRouter);

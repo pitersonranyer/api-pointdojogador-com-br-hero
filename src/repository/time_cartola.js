@@ -3,7 +3,7 @@ const sequelize = require('../database/database');
 
 const cadastrarTimeCartola = dadosTimeCartola => {
 
-  // Salvar dados scout atleta
+  // Salvar dados times cartola
   const time_cartola = new Time_Cartola({ ...dadosTimeCartola });
   time_cartola.save();
 

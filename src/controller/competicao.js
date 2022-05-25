@@ -2,7 +2,9 @@ const {
   cadastrarCompeticao,
   delCompeticaoPorId,
   putCompeticao, 
-  getTodasCompeticoes
+  getTodasCompeticoes,
+  getCompeticaoAtivas,
+  getBilheteCompeticaoGerado
 } = require('../repository/competicao');
 
 const cadastro = (req, res, next) => {
@@ -52,11 +54,27 @@ const excluirCompeticaoPorId = (req, res, next) => {
       .catch(err => next(err));
   };
 
+  const listarCompeticaoAtivas = (req, res, next) => {
+
+    return getCompeticaoAtivas()
+        .then(competicaoCartola => res.json(competicaoCartola))
+        .catch(err => next(err));
+    };
+
+    const listarBilheteCompeticaoGerado = (req, res, next) => {
+      const idUsuarioAdmLiga = req.params.idUsuarioAdmLiga;
+      return getBilheteCompeticaoGerado(idUsuarioAdmLiga)
+          .then(bilhete => res.json(bilhete))
+          .catch(err => next(err));
+    };
+
 
 module.exports = {
   cadastro,
   excluirCompeticaoPorId,
   alterarCompeticao,
-  listarTodasCompeticoes
+  listarTodasCompeticoes,
+  listarCompeticaoAtivas,
+  listarBilheteCompeticaoGerado
 };
 

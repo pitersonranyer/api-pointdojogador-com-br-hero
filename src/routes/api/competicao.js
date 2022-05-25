@@ -11,5 +11,9 @@ Router.put('/alterarCompeticao', autenticarRequisicao, controller.alterarCompeti
 
 Router.get('/listarCompeticao',  controller.listarTodasCompeticoes);
 
+Router.get('/listarCompeticaoAtivas',  controller.listarCompeticaoAtivas);
+
+Router.get('/listarBilheteCompeticaoGerado',  controller.listarBilheteCompeticaoGerado);
+
 
 module.exports = Router;

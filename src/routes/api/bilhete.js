@@ -3,7 +3,9 @@ const { autenticarRequisicao } = require('../../middleware/auth');
 
 const controller = require('../../controller/bilhete');
 
-Router.post('/',  controller.cadastro);
+Router.post('/',  autenticarRequisicao, controller.cadastro);
+
+Router.put('/alterarStatusBilheteCompeticao', autenticarRequisicao, controller.alterarStatusBilheteCompeticao);
 
 
 module.exports = Router;

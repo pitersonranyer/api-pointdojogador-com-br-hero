@@ -15,6 +15,26 @@ const Atleta_Pontuado = sequelize.define("atleta_pontuado", {
     type: Sequelize.BIGINT
   },
 
+  clube_id: {
+    allowNull: true,
+    type: Sequelize.SMALLINT
+  },
+
+  posicao_id: {
+    allowNull: true,
+    type: Sequelize.SMALLINT
+  },
+
+  apelido: {
+    allowNull: true,
+    type: Sequelize.STRING(255)
+  },
+
+  foto: {
+    allowNull: true,
+    type: Sequelize.STRING(255)
+  },
+
   pontuacao: {
     allowNull: true,
     type: Sequelize.DECIMAL(10, 2)

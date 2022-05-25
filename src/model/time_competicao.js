@@ -21,6 +21,11 @@ const Time_Competicao = sequelize.define("time_competicao", {
     primaryKey: true,
     type: Sequelize.BIGINT
   },
+
+  id_bilhete: {  
+    allowNull: true,
+    type: Sequelize.INTEGER
+  },
   
   pontuacao_rodada: {
     allowNull: true,

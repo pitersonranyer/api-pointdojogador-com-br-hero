@@ -1,4 +1,5 @@
 const Bilhete = require('../model/bilhete');
+const Time_Competicao = require('../model/time_competicao');
 const sequelize = require('../database/database');
 
 let data = new Date();
@@ -50,7 +51,40 @@ const cadastrarBilhete = async dadosBilhete => {
 
 };
 
+const putStatusBilhete = dadosBilhete => {
+
+
+  const id_bilhete = dadosBilhete.id_bilhete;
+  const status_atual_bilhete = dadosBilhete.status_atual_bilhete;
+
+
+  return Bilhete.update(
+    { status_atual_bilhete: status_atual_bilhete },
+    {
+      where: {
+        id_bilhete: id_bilhete
+      }
+    }
+  ).then(function (updatedRecord) {
+    if (updatedRecord) {
+      if (dadosBilhete.status_atual_bilhete === 'Cancelado') {
+        return Time_Competicao.destroy({
+          where:
+          {
+            id_bilhete: id_bilhete
+          }
+        })
+      }
+      return true;
+    }
+    else {
+      return false;
+    }
+  });
+};
+
 
 module.exports = {
-  cadastrarBilhete
+  cadastrarBilhete,
+  putStatusBilhete
 };
