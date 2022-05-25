@@ -421,72 +421,116 @@ const recuperarSituacaoPartidas = async () => {
 
 
 
-const putParciasAtletasTimes = async (time_id) => {
+const putParciasAtletasTimes = async () => {
 
-  path = `/time/id/${time_id}`;
-  var url = `${BASE_URL}${path}`;
-  atletasArray = [];
+  var path = '';
+  var url = '';
 
-  // consultarTimeCartola
-  resultJson = await unirest.get(url)
-    .header(
-      "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
-      "Accept", "application/json, text/plain, */*",
-      "Referer", "https://cartolafc.globo.com/",
-      "Origin", "https://cartolafc.globo.com/",
-      "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
-    )
 
-  if (resultJson.body) {
 
-    let idx = 0;
-    Object.keys(resultJson.body.atletas).forEach(atleta_id => {
-
-      const atleta = {
-        time_id: time_id,
-        numero_rodada: resultJson.body.rodada_atual,
-        atleta_id: resultJson.body.atletas[atleta_id].atleta_id,
-        apelido: resultJson.body.atletas[atleta_id].apelido,
-        pontuacao: resultJson.body.atletas[atleta_id].pontos_num,
-        variacao_num: resultJson.body.atletas[atleta_id].variacao_num,
-        foto: resultJson.body.atletas[atleta_id].foto,
-        posicao_id: resultJson.body.atletas[atleta_id].posicao_id,
-        clube_id: resultJson.body.atletas[atleta_id].clube_id,
-        qtdeGols: 0,
-        qtdeAssistencia: 0,
-        qtdeCartaoAmarelo: 0,
-        qtdeCartaoVermelho: 0,
-        qtdeGolContra: 0,
-        saldoGol: false,
-        atleta_titular: true
-
-      };
-
-      atletasArray.push(atleta);
-
-      if (resultJson.body.capitao_id === resultJson.body.atletas[idx].atleta_id) {
-        atletasArray[idx].atleta_capitao = true;
-      } else {
-        atletasArray[idx].atleta_capitao = false;
-      }
-
-      idx = idx + 1
-
+  timesCartola = await sequelize.query(" SELECT distinct `a`.`time_id` as `time_id_OK`, " +
+    " `b`.`time_id` FROM `time_cartola` `a` " +
+    " left outer join `escalacao_time_rodada` `b` " +
+    " on `b`.`time_id` = `a`.`time_id` " +
+    " where `b`.`time_id` is null "
+    , {
+      type: sequelize.QueryTypes.SELECT
     });
 
-    atletasArray.sort((a, b) => a['posicao_id'] - b['posicao_id']);
 
 
-    for (let ix = 0; ix < atletasArray.length; ix++) {
-      /* Gravar tabela de escalacao time titular  */
-      const escalacao_time_rodada = new Escalacao_Time_Rodada({ ...atletasArray[ix] });
-      escalacao_time_rodada.save();
+  if (timesCartola.length > 0) {
+
+    for (x = 0; x < timesCartola.length; x++) {
+
+      console.log(timesCartola[x].time_id_OK);
+
+      path = `/time/id/${timesCartola[x].time_id_OK}`;
+      url = `${BASE_URL}${path}`;
+
+      console.log(url);
+
+      atletasArray = [];
+      atletasArrayReservas = [];
+
+      // consultarTimeCartola
+      resultJson = await unirest.get(url)
+        .header(
+          "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+          "Accept", "application/json, text/plain, */*",
+          "Referer", "https://cartolafc.globo.com/",
+          "Origin", "https://cartolafc.globo.com/",
+          "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
+        )
+
+      if (resultJson.body) {
+
+        if (resultJson.body.atletas != undefined) {
+
+          var numeroRodada = resultJson.body.rodada_atual;
+
+          let idx = 0;
+          Object.keys(resultJson.body.atletas).forEach(atleta_id => {
+
+            const atleta = {
+              time_id: timesCartola[x].time_id_OK,
+              numero_rodada: numeroRodada,
+              atleta_id: resultJson.body.atletas[atleta_id].atleta_id,
+              posicao_id: resultJson.body.atletas[atleta_id].posicao_id,
+              atleta_titular: true
+            };
+
+            atletasArray.push(atleta);
+
+            if (resultJson.body.capitao_id === resultJson.body.atletas[idx].atleta_id) {
+              atletasArray[idx].atleta_capitao = true;
+            } else {
+              atletasArray[idx].atleta_capitao = false;
+            }
+
+            idx = idx + 1
+
+          });
+
+          atletasArray.sort((a, b) => a['posicao_id'] - b['posicao_id']);
+
+
+          for (let ix = 0; ix < atletasArray.length; ix++) {
+            /* Gravar tabela de escalacao time titular  */
+            const escalacao_time_rodada = new Escalacao_Time_Rodada({ ...atletasArray[ix] });
+            escalacao_time_rodada.save();
+          }
+
+          if (resultJson.body.reservas != undefined) {
+
+            Object.keys(resultJson.body.reservas).forEach(atleta_id => {
+
+              const atletaReserva = {
+                time_id: timesCartola[x].time_id_OK,
+                numero_rodada: numeroRodada,
+                atleta_id: resultJson.body.reservas[atleta_id].atleta_id,
+                posicao_id: resultJson.body.reservas[atleta_id].posicao_id,
+                atleta_titular: false,
+                atleta_capitao: false
+              };
+
+              atletasArrayReservas.push(atletaReserva);
+
+            });
+
+            for (let ii = 0; ii < atletasArrayReservas.length; ii++) {
+              /* Gravar tabela de escalacao time titular  */
+              const escalacao_time_rodada = new Escalacao_Time_Rodada({ ...atletasArrayReservas[ii] });
+              escalacao_time_rodada.save();
+            }
+          }
+        }
+      }
     }
 
     return atletasArray;
-
   }
-  
+
 }
 
 
