@@ -32,6 +32,11 @@ const Time_Competicao = sequelize.define("time_competicao", {
     type: Sequelize.DECIMAL(10, 2)
   },
 
+  pontuacao_rodada_sem_capitao: {
+    allowNull: true,
+    type: Sequelize.DECIMAL(10, 2)
+  },
+
   pontuacao_mensal: {
     allowNull: true,
     type: Sequelize.DECIMAL(10, 2)

@@ -8,6 +8,7 @@ let anoAtual = data.getFullYear();
 
 const cadastrarTimeCompeticao = async dadosTime_competicao => {
 
+
   var bilhete_aux = 0;
   var ticket_id_aux = '';
   var gravouTime = 'N';
@@ -19,8 +20,7 @@ const cadastrarTimeCompeticao = async dadosTime_competicao => {
       type: sequelize.QueryTypes.SELECT
     });
 
-    console.log("max", max);
-
+  
   if ((max[0].max === null)) {
     let numbersAsString = `${anoAtual}${'00000'}`;
     max[0].max = numbersAsString;
@@ -43,8 +43,8 @@ const cadastrarTimeCompeticao = async dadosTime_competicao => {
    
   for (let i = 0; i < dadosTime_competicao.length; i++) {
 
-    dadosTime_competicao[i].numero_rodada = 5;
-    dadosTime_competicao[i].id_competicao = 2;
+    dadosTime_competicao[i].numero_rodada = dadosTime_competicao[0].numero_rodada
+    dadosTime_competicao[i].id_competicao = dadosTime_competicao[0].id_competicao
 
     times = await sequelize.query("SELECT `time_competicao`.`time_id` " +
       "FROM `time_competicao` " +
@@ -129,13 +129,13 @@ const cadastrarTimeCompeticao = async dadosTime_competicao => {
 
 const getTimesDaCompeticao = async (id_competicao, numero_rodada_atual) => {
 
-  console.log(id_competicao, numero_rodada_atual); 
 
   result = await sequelize.query("Select `a`.`numero_rodada` " +
   ", `a`.`id_competicao` " +
   ", `a`.`time_id` " +
   ", `a`.`id_bilhete` " +
   ", `a`.`pontuacao_rodada` " +
+  ", `a`.`pontuacao_rodada_sem_capitao` " +
   ", `a`.`pontuacao_mensal` " +
   ", `a`.`pontuacao_primeiro_turno` " +
   ", `a`.`pontuacao_segundo_turno` " +

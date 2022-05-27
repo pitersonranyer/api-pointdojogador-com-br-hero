@@ -62,8 +62,8 @@ const excluirCompeticaoPorId = (req, res, next) => {
     };
 
     const listarBilheteCompeticaoGerado = (req, res, next) => {
-      const idUsuarioAdmLiga = req.params.idUsuarioAdmLiga;
-      return getBilheteCompeticaoGerado(idUsuarioAdmLiga)
+     // const idUsuarioAdmLiga = req.params.idUsuarioAdmLiga;
+      return getBilheteCompeticaoGerado()
           .then(bilhete => res.json(bilhete))
           .catch(err => next(err));
     };

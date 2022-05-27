@@ -3,6 +3,8 @@ var fs = require("fs");
 const Atleta_Pontuado = require('../model/atleta_pontuado');
 const Scout_Atleta = require('../model/scout_atleta');
 const Escalacao_Time_Rodada = require('../model/escalacao_time_rodada');
+const Substituicao_Time_Rodada = require('../model/substituicao_time_rodada');
+const Time_Competicao = require('../model/time_competicao');
 
 const sequelize = require('../database/database');
 
@@ -421,12 +423,10 @@ const recuperarSituacaoPartidas = async () => {
 
 
 
-const putParciasAtletasTimes = async () => {
+const putParciasAtletasTimes = async (numeroRodada) => {
 
   var path = '';
   var url = '';
-
-
 
   timesCartola = await sequelize.query(" SELECT distinct `a`.`time_id` as `time_id_OK`, " +
     " `b`.`time_id` FROM `time_cartola` `a` " +
@@ -443,12 +443,8 @@ const putParciasAtletasTimes = async () => {
 
     for (x = 0; x < timesCartola.length; x++) {
 
-      console.log(timesCartola[x].time_id_OK);
-
       path = `/time/id/${timesCartola[x].time_id_OK}`;
       url = `${BASE_URL}${path}`;
-
-      console.log(url);
 
       atletasArray = [];
       atletasArrayReservas = [];
@@ -465,9 +461,10 @@ const putParciasAtletasTimes = async () => {
 
       if (resultJson.body) {
 
+   //     var numeroRodada = resultJson.body.rodada_atual;
+
         if (resultJson.body.atletas != undefined) {
 
-          var numeroRodada = resultJson.body.rodada_atual;
 
           let idx = 0;
           Object.keys(resultJson.body.atletas).forEach(atleta_id => {
@@ -525,7 +522,67 @@ const putParciasAtletasTimes = async () => {
             }
           }
         }
+
+        /* Atualizar banco de reservas */
+
+        path = `/time/substituicoes/${timesCartola[x].time_id_OK}/${numeroRodada}`;
+        var url = `${BASE_URL}${path}`;
+
+        arrayAtletaBancoEntrou = [];
+        arrayAtletaBancoSaiu = [];
+
+        substituicao = await unirest.get(url)
+          .header(
+            "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+            "Accept", "application/json, text/plain, */*",
+            "Referer", "https://cartolafc.globo.com/",
+            "Origin", "https://cartolafc.globo.com/",
+            "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
+          )
+
+        if (substituicao) {
+
+          /* Atleta entrou */
+          Object.keys(substituicao.body).forEach(entrou => {
+            const atleta_entrou = {
+              numero_rodada: numeroRodada,
+              time_id: timesCartola[x].time_id_OK,
+              atleta_id: substituicao.body[entrou].entrou.atleta_id,
+              entrou: true,
+              saiu: false
+            };
+            arrayAtletaBancoEntrou.push(atleta_entrou);
+          });
+
+          for (let ii = 0; ii < arrayAtletaBancoEntrou.length; ii++) {
+            /* Gravar tabela de escalacao time titular  */
+            const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoEntrou[ii] });
+            substituicao_time_rodada.save();
+          }
+
+          /* Atleta saiu */
+          Object.keys(substituicao.body).forEach(saiu => {
+            const atleta_saiu = {
+              numero_rodada: numeroRodada,
+              time_id: timesCartola[x].time_id_OK,
+              atleta_id: substituicao.body[saiu].saiu.atleta_id,
+              saiu: true,
+              entrou: false,
+            };
+            arrayAtletaBancoSaiu.push(atleta_saiu);
+          });
+
+          for (let ii = 0; ii < arrayAtletaBancoSaiu.length; ii++) {
+            /* Gravar tabela de escalacao time titular  */
+            const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoSaiu[ii] });
+            substituicao_time_rodada.save();
+          }
+        }
+
       }
+
+
+
     }
 
     return atletasArray;
@@ -533,9 +590,153 @@ const putParciasAtletasTimes = async () => {
 
 }
 
+const putBancoReservasTimes = async (time_id) => {
+
+  path = `/time/substituicoes/${time_id}/${7}`;
+  var url = `${BASE_URL}${path}`;
+
+  arrayAtletaBancoEntrou = [];
+  arrayAtletaBancoSaiu = [];
+
+  substituicao = await unirest.get(url)
+    .header(
+      "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+      "Accept", "application/json, text/plain, */*",
+      "Referer", "https://cartolafc.globo.com/",
+      "Origin", "https://cartolafc.globo.com/",
+      "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
+    )
+
+  if (substituicao) {
+
+    /* Atleta entrou */
+    Object.keys(substituicao.body).forEach(entrou => {
+      const atleta_entrou = {
+        numero_rodada: 7,
+        time_id: time_id,
+        atleta_id: substituicao.body[entrou].entrou.atleta_id,
+        entrou: true,
+        saiu: false
+      };
+      arrayAtletaBancoEntrou.push(atleta_entrou);
+    });
+
+    for (let ii = 0; ii < arrayAtletaBancoEntrou.length; ii++) {
+      /* Gravar tabela de escalacao time titular  */
+      const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoEntrou[ii] });
+      substituicao_time_rodada.save();
+    }
+
+    /* Atleta saiu */
+    Object.keys(substituicao.body).forEach(saiu => {
+      const atleta_saiu = {
+        numero_rodada: 7,
+        time_id: time_id,
+        atleta_id: substituicao.body[saiu].saiu.atleta_id,
+        saiu: true,
+        entrou: false,
+      };
+      arrayAtletaBancoSaiu.push(atleta_saiu);
+    });
+
+    for (let ii = 0; ii < arrayAtletaBancoSaiu.length; ii++) {
+      /* Gravar tabela de escalacao time titular  */
+      const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoSaiu[ii] });
+      substituicao_time_rodada.save();
+    }
+
+    return substituicao.body;
+  }
+
+
+}
+
+
+const putParciasTimes = async (numero_rodada, id_competicao) => {
+
+  timesCartola = await sequelize.query(" SELECT `A`.`time_id` " +
+    " , sum(`E`.`pontuacao`) as `pontuacao_sem_capitao` " +
+    " , sum(CASE WHEN `C`.`atleta_capitao` = true THEN `E`.`pontuacao` * 2 " +
+    " else `E`.`pontuacao` end ) as `pontuacao_com_capitao` " +
+    " FROM `time_cartola` `A`" +
+
+    "INNER JOIN `time_competicao` `B` " +
+    "  ON `B`.`time_id` = `A`.`time_id`" +
+
+    " INNER JOIN `escalacao_time_rodada` `C` " +
+    " ON  `C`.`numero_rodada` = `B`.`numero_rodada` " +
+    " and `C`.`time_id`       = `B`.`time_id` " +
+
+    " LEFT OUTER JOIN `substituicao_time_rodada` `D`" +
+    " ON  `D`.`numero_rodada` = `C`.`numero_rodada`" +
+    " and `D`.`time_id`       = `C`.`time_id`" +
+    " and `D`.`atleta_id`     = `C`.`atleta_id`" +
+
+    " INNER JOIN `atleta_pontuado` `E`" +
+    "  ON `E`.`atleta_id` = `C`.`atleta_id` " +
+
+
+    " WHERE `B`.`numero_rodada` " + `= "${numero_rodada}" ` +
+    " AND   `B`.`id_competicao` " + `= "${id_competicao}" ` +
+
+    " and (( `d`.`time_id` is not null " +
+    "   and   `d`.`entrou` = true) " +
+    "   or    ( `c`.`atleta_titular` = true " +
+    "   and   `d`.`time_id` is null)) " +
+
+    "  group by `A`.`time_id` " +
+    " order by `pontuacao_com_capitao` desc "
+    , {
+      type: sequelize.QueryTypes.SELECT
+    });
+
+
+  if (timesCartola.length > 0) {
+
+    for (x = 0; x < timesCartola.length; x++) {
+
+      Time_Competicao.update(
+
+        {
+          pontuacao_rodada: timesCartola[x].pontuacao_com_capitao,
+          pontuacao_rodada_sem_capitao: timesCartola[x].pontuacao_sem_capitao
+        },
+        {
+          where: {
+            numero_rodada: numero_rodada,
+            id_competicao: id_competicao,
+            time_id: timesCartola[x].time_id
+          }
+        }
+
+      )
+
+    }
+
+  }
+
+  return timesCartola;
+
+}
+
+const getParciaisAtletasRodada = async (numero_rodada) => {
+  return atletas = await Atleta_Pontuado.findAll({
+    where: { numero_rodada: numero_rodada },
+    order: [
+      ['pontuacao', 'DESC']
+    ],
+  })
+}
+
+
+
+
 
 module.exports = {
   putAtletasPontuados,
-  putParciasAtletasTimes
+  putParciasAtletasTimes,
+  putBancoReservasTimes,
+  putParciasTimes,
+  getParciaisAtletasRodada
 
 };
