@@ -189,6 +189,9 @@ const getCompeticaoAtivas = async () => {
       dadosCompeticao[i].dataFim = dadosCompeticao[i].data_fim_inscricao.substring(0, 5);
       dadosCompeticao[i].horaFim = dadosCompeticao[i].hora_fim_inscricao.substring(0, 5);
 
+
+      
+
     }
 
 

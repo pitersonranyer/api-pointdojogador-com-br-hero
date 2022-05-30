@@ -141,6 +141,7 @@ const getTimesDaCompeticao = async (id_competicao, numero_rodada_atual) => {
   ", `a`.`pontuacao_segundo_turno` " +
   ", `a`.`pontuacao_total` " +
   ", `a`.`colocacao_rodada` " +
+  ", `a`.`qtde_jogador_pontuado` " +
   ", `b`.`numero_rodada_atual` " +
   ", `b`.`valor_competicao` " +
   ", `b`.`tipo_competicao` " +

@@ -49,7 +49,7 @@ const recuperarAtletasPontuados = async () => {
   }
 
 
- arrayAtletas = [];
+  arrayAtletas = [];
   scoutJogador = [];
 
   dadosAtletas = await unirest.get(url)
@@ -441,7 +441,7 @@ const putParciasAtletasTimes = async (numeroRodada) => {
     " `b`.`time_id` FROM `time_cartola` `a` " +
     " left outer join `escalacao_time_rodada` `b` " +
     " on   `b`.`time_id` = `a`.`time_id` " +
-    " and  `b`.`numero_rodada` "  + `= "${numeroRodada}" ` +
+    " and  `b`.`numero_rodada` " + `= "${numeroRodada}" ` +
     " where `b`.`time_id` is null "
     , {
       type: sequelize.QueryTypes.SELECT
@@ -705,11 +705,36 @@ const putParciasTimes = async (numero_rodada, id_competicao) => {
 
     for (x = 0; x < timesCartola.length; x++) {
 
+                                                 
+      qt_atleta_pontuado = await sequelize.query("SELECT COUNT(*) as `count` " +
+          " FROM  `escalacao_time_rodada` `A` " +
+          "  LEFT OUTER JOIN `substituicao_time_rodada` `B` " +
+          " ON  `B`.`numero_rodada` = `A`.`numero_rodada` " +
+          " and `B`.`time_id`       = `A`.`time_id` " +
+          " and `B`.`atleta_id`     = `A`.`atleta_id` " +
+          " INNER JOIN `atleta_pontuado` `C` " +
+          " ON  `C`.`atleta_id` = `A`.`atleta_id` " +
+          " and `C`.`numero_rodada` = `A`.`numero_rodada` " +
+          " WHERE `A`.`numero_rodada`  " + `= "${numero_rodada}" ` +
+          " and   `A`.`time_id` "        + `= "${timesCartola[x].time_id}" ` +
+          " and   ( `C`.`posicao_id` <> 6 " +
+          "        or  `C`.`pontuacao` <> 0 ) " +
+          " and (( `B`.`time_id` is not null " +
+          " and   `B`.`entrou` = true) " +
+          " or    ( `A`.`atleta_titular` = true " +
+          " and   `B`.`time_id` is null)) "
+          , {
+            type: sequelize.QueryTypes.SELECT
+          });
+
+        timesCartola[x].qtde_jogador_pontuado = qt_atleta_pontuado[0].count;
+
       Time_Competicao.update(
 
         {
           pontuacao_rodada: timesCartola[x].pontuacao_com_capitao,
-          pontuacao_rodada_sem_capitao: timesCartola[x].pontuacao_sem_capitao
+          pontuacao_rodada_sem_capitao: timesCartola[x].pontuacao_sem_capitao,
+          qtde_jogador_pontuado: timesCartola[x].qtde_jogador_pontuado
         },
         {
           where: {

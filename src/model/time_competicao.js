@@ -62,7 +62,11 @@ const Time_Competicao = sequelize.define("time_competicao", {
     type: Sequelize.SMALLINT
   },
 
-  
+  qtde_jogador_pontuado: {
+    allowNull: true,
+    type: Sequelize.SMALLINT
+  },
+ 
   
 },
 
