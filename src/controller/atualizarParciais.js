@@ -8,8 +8,9 @@ const {
 
 
 const atualizarAtletasPontuados = async (req, res, next) => {
-  const numero_rodada = req.params.numero_rodada
-  return putAtletasPontuados(numero_rodada)
+  const numero_rodada = req.params.numero_rodada;
+  const statusMercado = req.params.statusMercado;
+  return putAtletasPontuados(numero_rodada, statusMercado)
     .then(atu => res.json(atu))
     .catch(err => next(err));
 };

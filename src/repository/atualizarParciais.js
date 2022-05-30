@@ -11,11 +11,13 @@ const sequelize = require('../database/database');
 const BASE_URL = 'https://api.cartolafc.globo.com';
 
 var numeroRodada = 0;
+var mercado = 0;
 
 
-const putAtletasPontuados = async (numero_rodada) => {
+const putAtletasPontuados = async (numero_rodada, statusMercado) => {
 
   numeroRodada = numero_rodada;
+  mercado = statusMercado;
 
   /* Recuperar lista de atletas pontuados */
   const pontuados = await recuperarAtletasPontuados();
@@ -37,10 +39,17 @@ const putAtletasPontuados = async (numero_rodada) => {
 
 const recuperarAtletasPontuados = async () => {
 
-  path = `/atletas/pontuados`;
-  var url = `${BASE_URL}${path}/${numeroRodada}`;
 
-  arrayAtletas = [];
+  if (mercado == 2) { // Fechado
+    path = `/atletas/pontuados`;
+    var url = `${BASE_URL}${path}`;
+  } else {
+    path = `/atletas/pontuados`;
+    var url = `${BASE_URL}${path}/${numeroRodada}`;
+  }
+
+
+ arrayAtletas = [];
   scoutJogador = [];
 
   dadosAtletas = await unirest.get(url)
@@ -431,13 +440,12 @@ const putParciasAtletasTimes = async (numeroRodada) => {
   timesCartola = await sequelize.query(" SELECT distinct `a`.`time_id` as `time_id_OK`, " +
     " `b`.`time_id` FROM `time_cartola` `a` " +
     " left outer join `escalacao_time_rodada` `b` " +
-    " on `b`.`time_id` = `a`.`time_id` " +
+    " on   `b`.`time_id` = `a`.`time_id` " +
+    " and  `b`.`numero_rodada` "  + `= "${numeroRodada}" ` +
     " where `b`.`time_id` is null "
     , {
       type: sequelize.QueryTypes.SELECT
     });
-
-
 
   if (timesCartola.length > 0) {
 
@@ -445,6 +453,7 @@ const putParciasAtletasTimes = async (numeroRodada) => {
 
       path = `/time/id/${timesCartola[x].time_id_OK}`;
       url = `${BASE_URL}${path}`;
+
 
       atletasArray = [];
       atletasArrayReservas = [];
@@ -461,7 +470,7 @@ const putParciasAtletasTimes = async (numeroRodada) => {
 
       if (resultJson.body) {
 
-   //     var numeroRodada = resultJson.body.rodada_atual;
+        //     var numeroRodada = resultJson.body.rodada_atual;
 
         if (resultJson.body.atletas != undefined) {
 
@@ -673,7 +682,8 @@ const putParciasTimes = async (numero_rodada, id_competicao) => {
     " and `D`.`atleta_id`     = `C`.`atleta_id`" +
 
     " INNER JOIN `atleta_pontuado` `E`" +
-    "  ON `E`.`atleta_id` = `C`.`atleta_id` " +
+    " ON  `E`.`atleta_id`     = `C`.`atleta_id` " +
+    " and `E`.`numero_rodada` = `B`.`numero_rodada` " +
 
 
     " WHERE `B`.`numero_rodada` " + `= "${numero_rodada}" ` +
