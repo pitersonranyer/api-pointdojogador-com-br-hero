@@ -267,8 +267,64 @@ const getTimesDaCompeticao = async (id_competicao, numero_rodada_atual) => {
 
 }
 
+const getAtletasTimeCompeticao = async (time_id, numero_rodada) => {
+
+  atletasTitulares = [];
+  atletasReservas  = [];
+
+  atletas  = {};
+
+  result = await sequelize.query("SELECT  `A`.`atleta_titular` " +
+  ", `A`.`atleta_capitao` " +
+  ", `B`.`atleta_id` " +
+  ", `B`.`apelido` " +
+  ", `B`.`foto` " +
+  ", `B`.`posicao_id` " +
+  ", `B`.`clube_id` " +
+  ", `C`.`pontuacao` as `pontuacao_sem_capitao` " + 
+  ", CASE WHEN `A`.`atleta_capitao` = true THEN `C`.`pontuacao` * 2  " +
+  "      ELSE `C`.`pontuacao` end   " +
+  "   AS  `pontuacao_com_capitao` " +
+  "FROM `escalacao_time_rodada` `A` " +
+  "    INNER JOIN `atleta` `B` " +
+  "  ON  `B`.`atleta_id` = `A`.`atleta_id` " +
+  "  LEFT OUTER JOIN `atleta_pontuado` `C`  " +
+  "  ON  `C`.`atleta_id` = `A`.`atleta_id` " +
+  "  and `C`.`numero_rodada` = `A`.`numero_rodada` " +
+  "  WHERE `A`.`time_id`  =  " + `${time_id} ` +
+  "  AND   `A`.`numero_rodada` =  " + `${numero_rodada} ` +
+  "  ORDER BY `A`.`atleta_titular` DESC, `B`.`posicao_id`" 
+    , {
+      type: sequelize.QueryTypes.SELECT
+    });
+
+
+    if (result.length > 0) {
+      for (let i = 0; i < result.length; i++) {
+        if (result[i].atleta_titular){
+          atletasTitulares.push(result[i]);
+        }
+      }
+     
+    }
+
+
+    if (result.length > 0) {
+      for (let i = 0; i < result.length; i++) {
+        if (!result[i].atleta_titular){
+          atletasReservas.push(result[i]);
+        }
+      }
+      
+    }
+
+    atletas = ({ atletasTitulares, atletasReservas });
+ 
+    return atletas;
+}
 
 module.exports = {
   cadastrarTimeCompeticao,
-  getTimesDaCompeticao
+  getTimesDaCompeticao,
+  getAtletasTimeCompeticao
 };

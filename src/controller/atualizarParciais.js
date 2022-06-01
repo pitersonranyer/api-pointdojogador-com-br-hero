@@ -3,7 +3,8 @@ const {
   putParciasAtletasTimes,
   putBancoReservasTimes,
   putParciasTimes,
-  getParciaisAtletasRodada
+  getParciaisAtletasRodada,
+  putMercadoAtletas
 } = require('../repository/atualizarParciais');
 
 
@@ -53,15 +54,22 @@ const atualizarBancoReservasTimes = async (req, res, next) => {
      .catch(err => next(err));
  };
 
+ const atualizarMercadoAtletas = async (req, res, next) => {
 
- getParciaisAtletasRodada
+ return putMercadoAtletas()
+     .then(mercadoAtleta => res.json(mercadoAtleta))
+     .catch(err => next(err));
+ };
 
+
+ 
 
 module.exports = {
   atualizarAtletasPontuados,
   atualizarParciasAtletasTimes,
   atualizarBancoReservasTimes,
   atualizarParciasTimes,
-  listarParciaisAtletasRodada
+  listarParciaisAtletasRodada,
+  atualizarMercadoAtletas
 
 };

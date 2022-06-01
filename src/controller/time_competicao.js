@@ -1,6 +1,7 @@
 const {
   cadastrarTimeCompeticao,
-  getTimesDaCompeticao
+  getTimesDaCompeticao,
+  getAtletasTimeCompeticao
 } = require('../repository/time_competicao');
 
 const cadastro = async  (req, res, next) => {
@@ -24,8 +25,20 @@ const listarTimesDaCompeticao = async  (req, res, next) => {
     .catch(err => next(err));
 };
 
+
+
+const listarAtletasTimeCompeticao = async  (req, res, next) => {
+  const time_id = req.params.time_id;
+  const numero_rodada = req.params.numero_rodada;
+  return getAtletasTimeCompeticao(time_id, numero_rodada)
+    .then(atletas => res.json(atletas))
+    .catch(err => next(err));
+};
+
+
 module.exports = {
   cadastro,
-  listarTimesDaCompeticao
+  listarTimesDaCompeticao,
+  listarAtletasTimeCompeticao
 };
 

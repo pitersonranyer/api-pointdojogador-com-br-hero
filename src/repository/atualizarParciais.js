@@ -5,6 +5,7 @@ const Scout_Atleta = require('../model/scout_atleta');
 const Escalacao_Time_Rodada = require('../model/escalacao_time_rodada');
 const Substituicao_Time_Rodada = require('../model/substituicao_time_rodada');
 const Time_Competicao = require('../model/time_competicao');
+const Atleta = require('../model/atleta');
 
 const sequelize = require('../database/database');
 
@@ -117,7 +118,7 @@ const gravarAtletas = async (objAtletas) => {
   objAtletas.qtde_gol_contra = 0;
   objAtletas.saldo_gol = false;
 
-  //Gravar atletas
+  //Gravar atletas pontuados
   const atleta_pontuado = new Atleta_Pontuado({ ...objAtletas });
   atleta_pontuado.save();
 
@@ -705,29 +706,29 @@ const putParciasTimes = async (numero_rodada, id_competicao) => {
 
     for (x = 0; x < timesCartola.length; x++) {
 
-                                                 
-      qt_atleta_pontuado = await sequelize.query("SELECT COUNT(*) as `count` " +
-          " FROM  `escalacao_time_rodada` `A` " +
-          "  LEFT OUTER JOIN `substituicao_time_rodada` `B` " +
-          " ON  `B`.`numero_rodada` = `A`.`numero_rodada` " +
-          " and `B`.`time_id`       = `A`.`time_id` " +
-          " and `B`.`atleta_id`     = `A`.`atleta_id` " +
-          " INNER JOIN `atleta_pontuado` `C` " +
-          " ON  `C`.`atleta_id` = `A`.`atleta_id` " +
-          " and `C`.`numero_rodada` = `A`.`numero_rodada` " +
-          " WHERE `A`.`numero_rodada`  " + `= "${numero_rodada}" ` +
-          " and   `A`.`time_id` "        + `= "${timesCartola[x].time_id}" ` +
-          " and   ( `C`.`posicao_id` <> 6 " +
-          "        or  `C`.`pontuacao` <> 0 ) " +
-          " and (( `B`.`time_id` is not null " +
-          " and   `B`.`entrou` = true) " +
-          " or    ( `A`.`atleta_titular` = true " +
-          " and   `B`.`time_id` is null)) "
-          , {
-            type: sequelize.QueryTypes.SELECT
-          });
 
-        timesCartola[x].qtde_jogador_pontuado = qt_atleta_pontuado[0].count;
+      qt_atleta_pontuado = await sequelize.query("SELECT COUNT(*) as `count` " +
+        " FROM  `escalacao_time_rodada` `A` " +
+        "  LEFT OUTER JOIN `substituicao_time_rodada` `B` " +
+        " ON  `B`.`numero_rodada` = `A`.`numero_rodada` " +
+        " and `B`.`time_id`       = `A`.`time_id` " +
+        " and `B`.`atleta_id`     = `A`.`atleta_id` " +
+        " INNER JOIN `atleta_pontuado` `C` " +
+        " ON  `C`.`atleta_id` = `A`.`atleta_id` " +
+        " and `C`.`numero_rodada` = `A`.`numero_rodada` " +
+        " WHERE `A`.`numero_rodada`  " + `= "${numero_rodada}" ` +
+        " and   `A`.`time_id` " + `= "${timesCartola[x].time_id}" ` +
+        " and   ( `C`.`posicao_id` <> 6 " +
+        "        or  `C`.`pontuacao` <> 0 ) " +
+        " and (( `B`.`time_id` is not null " +
+        " and   `B`.`entrou` = true) " +
+        " or    ( `A`.`atleta_titular` = true " +
+        " and   `B`.`time_id` is null)) "
+        , {
+          type: sequelize.QueryTypes.SELECT
+        });
+
+      timesCartola[x].qtde_jogador_pontuado = qt_atleta_pontuado[0].count;
 
       Time_Competicao.update(
 
@@ -764,6 +765,75 @@ const getParciaisAtletasRodada = async (numero_rodada) => {
 }
 
 
+const putMercadoAtletas = async () => {
+
+  path = `/atletas/mercado`;
+  var url = `${BASE_URL}${path}`;
+  arrayMercadoAtletas = [];
+
+  dadosMercadoAtletas = await unirest.get(url)
+    .header(
+      "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+      "Accept", "application/json, text/plain, */*",
+      "Referer", "https://cartolafc.globo.com/",
+      "Origin", "https://cartolafc.globo.com/",
+      "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
+    )
+
+
+
+  if (dadosMercadoAtletas.body) {
+
+    Object.keys(dadosMercadoAtletas.body.atletas).forEach(atleta_id => {
+      const mercadoAtleta = {
+        atleta_id: dadosMercadoAtletas.body.atletas[atleta_id].atleta_id,
+        apelido: dadosMercadoAtletas.body.atletas[atleta_id].apelido,
+        foto: dadosMercadoAtletas.body.atletas[atleta_id].foto,
+        posicao_id: dadosMercadoAtletas.body.atletas[atleta_id].posicao_id,
+        clube_id: dadosMercadoAtletas.body.atletas[atleta_id].clube_id,
+      };
+
+      if (mercadoAtleta.foto != null) {
+        mercadoAtleta.foto = mercadoAtleta.foto.replace('FORMATO', '140x140');
+      }
+
+
+      arrayMercadoAtletas.push(mercadoAtleta);
+
+
+
+    });
+
+    for (x = 0; x < arrayMercadoAtletas.length; x++) {
+      
+        const atletas = {
+          atleta_id: arrayMercadoAtletas[x].atleta_id,
+          apelido: arrayMercadoAtletas[x].apelido,
+          foto: arrayMercadoAtletas[x].foto,
+          posicao_id: arrayMercadoAtletas[x].posicao_id,
+          clube_id: arrayMercadoAtletas[x].clube_id,
+        };
+
+        Atleta.findOne({ where: { atleta_id: atletas.atleta_id } }).then(listado => {
+          if (listado === null) {
+            const atleta = new Atleta({ ...atletas });
+            atleta.save();
+          } else {
+            Atleta.update({ apelido: atletas.apelido,
+              foto: atletas.foto,
+              posicao_id: atletas.posicao_id,
+              clube_id: atletas.clube_id
+            },
+              {where: {atleta_id: atletas.atleta_id }});
+          }
+        });
+    }
+
+    return arrayMercadoAtletas;
+
+  }
+
+}
 
 
 
@@ -772,6 +842,7 @@ module.exports = {
   putParciasAtletasTimes,
   putBancoReservasTimes,
   putParciasTimes,
-  getParciaisAtletasRodada
+  getParciaisAtletasRodada,
+  putMercadoAtletas
 
 };
