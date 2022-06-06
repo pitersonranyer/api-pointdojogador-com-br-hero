@@ -1,7 +1,6 @@
 const {
   putAtletasPontuados ,
   putParciasAtletasTimes,
-  putBancoReservasTimes,
   putParciasTimes,
   getParciaisAtletasRodada,
   putMercadoAtletas
@@ -25,15 +24,6 @@ const atualizarParciasAtletasTimes = async (req, res, next) => {
     .then(atletas => res.json(atletas))
     .catch(err => next(err));
 };
-
-const atualizarBancoReservasTimes = async (req, res, next) => {
-
-  const time_id = req.params.time_id
- 
-  return putBancoReservasTimes(time_id)
-     .then(banco => res.json(banco))
-     .catch(err => next(err));
- };
 
  const atualizarParciasTimes = async (req, res, next) => {
 
@@ -67,7 +57,6 @@ const atualizarBancoReservasTimes = async (req, res, next) => {
 module.exports = {
   atualizarAtletasPontuados,
   atualizarParciasAtletasTimes,
-  atualizarBancoReservasTimes,
   atualizarParciasTimes,
   listarParciaisAtletasRodada,
   atualizarMercadoAtletas

@@ -35,6 +35,9 @@ const putAtletasPontuados = async (numero_rodada, statusMercado) => {
   /* Atualizar tabela atletas  */
   await atualizarTabelaAtletasPontuados(pontuados);
 
+  /* atualizar substitução banco reservas  */
+  await atualizarSubstituiçãoBancoReservas(numeroRodada);
+
 
 }
 
@@ -299,6 +302,8 @@ const atualizarTabelaAtletasPontuados = async (pontuados) => {
     }
 
 
+
+
     /* Recuprar jogos por atleta  */
     for (ix = 0; ix < partidas.length; ix++) {
       if (partidas[ix].clube_casa_id === pontuados[a].clube_id || partidas[ix].clube_visitante_id === pontuados[a].clube_id) {
@@ -333,6 +338,128 @@ const atualizarTabelaAtletasPontuados = async (pontuados) => {
       }
     )
   }
+}
+
+const atualizarSubstituiçãoBancoReservas = async (numeroRodada) => {
+
+  /* Atualizar banco de reservas */
+
+  arrayAtletaBancoEntrou = [];
+      arrayAtletaBancoSaiu = [];
+
+  timesEscalacao = await sequelize.query(" SELECT distinct `time_id`  " +
+    " FROM `escalacao_time_rodada`  " +
+    " where  `numero_rodada` " + `= "${numeroRodada}" `
+    , {
+      type: sequelize.QueryTypes.SELECT
+    });
+
+  if (timesEscalacao.length > 0) {
+
+    for (x = 0; x < timesEscalacao.length; x++) {
+      path = `/time/substituicoes/${timesEscalacao[x].time_id}/${numeroRodada}`;
+      var url = `${BASE_URL}${path}`;
+
+      
+
+      substituicao = await unirest.get(url)
+        .header(
+          "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+          "Accept", "application/json, text/plain, */*",
+          "Referer", "https://cartolafc.globo.com/",
+          "Origin", "https://cartolafc.globo.com/",
+          "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
+        )
+
+      if (substituicao) {
+
+        /* Atleta entrou */
+        Object.keys(substituicao.body).forEach(entrou => {
+          const atleta_entrou = {
+            numero_rodada: numeroRodada,
+            time_id: timesEscalacao[x].time_id,
+            atleta_id: substituicao.body[entrou].entrou.atleta_id,
+            entrou: true,
+            saiu: false
+          };
+          arrayAtletaBancoEntrou.push(atleta_entrou);
+        });
+
+        for (let ii = 0; ii < arrayAtletaBancoEntrou.length; ii++) {
+          /* Gravar tabela de escalacao time titular  */  
+
+            Substituicao_Time_Rodada.findOne({
+            where: {
+              numero_rodada: numeroRodada,
+              time_id: arrayAtletaBancoEntrou[ii].time_id,
+              atleta_id: arrayAtletaBancoEntrou[ii].atleta_id
+            }
+          }).then(listado => {
+            if (listado === null) {
+              const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoEntrou[ii] });
+              substituicao_time_rodada.save();
+            } else {
+              Substituicao_Time_Rodada.update({
+                entrou: arrayAtletaBancoEntrou[ii].entrou,
+                saiu: arrayAtletaBancoEntrou[ii].saiu
+              },
+                {
+                  where: {
+                    numero_rodada: numeroRodada,
+                    time_id: arrayAtletaBancoEntrou[ii].time_id,
+                    atleta_id: arrayAtletaBancoEntrou[ii].atleta_id
+                  }
+                });
+            }
+          });
+
+        }
+
+        /* Atleta saiu */
+        Object.keys(substituicao.body).forEach(saiu => {
+          const atleta_saiu = {
+            numero_rodada: numeroRodada,
+            time_id: timesEscalacao[x].time_id,
+            atleta_id: substituicao.body[saiu].saiu.atleta_id,
+            saiu: true,
+            entrou: false,
+          };
+          arrayAtletaBancoSaiu.push(atleta_saiu);
+        });
+
+        for (let ii = 0; ii < arrayAtletaBancoSaiu.length; ii++) {
+          /* Gravar tabela de escalacao time titular  */
+          Substituicao_Time_Rodada.findOne({
+            where: {
+              numero_rodada: numeroRodada,
+              time_id: arrayAtletaBancoSaiu[ii].time_id,
+              atleta_id: arrayAtletaBancoSaiu[ii].atleta_id
+            }
+          }).then(listado => {
+            if (listado === null) {
+              const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoSaiu[ii] });
+              substituicao_time_rodada.save();
+            } else {
+              Substituicao_Time_Rodada.update({
+                entrou: arrayAtletaBancoSaiu[ii].entrou,
+                saiu: arrayAtletaBancoSaiu[ii].saiu
+              },
+                {
+                  where: {
+                    numero_rodada: numeroRodada,
+                    time_id: arrayAtletaBancoSaiu[ii].time_id,
+                    atleta_id: arrayAtletaBancoSaiu[ii].atleta_id
+                  }
+                });
+            }
+          });
+        }
+      }
+
+    }
+
+  }
+
 }
 
 const recuperarSituacaoPartidas = async () => {
@@ -600,67 +727,6 @@ const putParciasAtletasTimes = async (numeroRodada) => {
 
 }
 
-const putBancoReservasTimes = async (time_id) => {
-
-  path = `/time/substituicoes/${time_id}/${7}`;
-  var url = `${BASE_URL}${path}`;
-
-  arrayAtletaBancoEntrou = [];
-  arrayAtletaBancoSaiu = [];
-
-  substituicao = await unirest.get(url)
-    .header(
-      "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
-      "Accept", "application/json, text/plain, */*",
-      "Referer", "https://cartolafc.globo.com/",
-      "Origin", "https://cartolafc.globo.com/",
-      "Accept-Language", "pt-BR,pt;q=0.8,en-US;q=0.6,en;q=0.4,es;q=0.2"
-    )
-
-  if (substituicao) {
-
-    /* Atleta entrou */
-    Object.keys(substituicao.body).forEach(entrou => {
-      const atleta_entrou = {
-        numero_rodada: 7,
-        time_id: time_id,
-        atleta_id: substituicao.body[entrou].entrou.atleta_id,
-        entrou: true,
-        saiu: false
-      };
-      arrayAtletaBancoEntrou.push(atleta_entrou);
-    });
-
-    for (let ii = 0; ii < arrayAtletaBancoEntrou.length; ii++) {
-      /* Gravar tabela de escalacao time titular  */
-      const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoEntrou[ii] });
-      substituicao_time_rodada.save();
-    }
-
-    /* Atleta saiu */
-    Object.keys(substituicao.body).forEach(saiu => {
-      const atleta_saiu = {
-        numero_rodada: 7,
-        time_id: time_id,
-        atleta_id: substituicao.body[saiu].saiu.atleta_id,
-        saiu: true,
-        entrou: false,
-      };
-      arrayAtletaBancoSaiu.push(atleta_saiu);
-    });
-
-    for (let ii = 0; ii < arrayAtletaBancoSaiu.length; ii++) {
-      /* Gravar tabela de escalacao time titular  */
-      const substituicao_time_rodada = new Substituicao_Time_Rodada({ ...arrayAtletaBancoSaiu[ii] });
-      substituicao_time_rodada.save();
-    }
-
-    return substituicao.body;
-  }
-
-
-}
-
 
 const putParciasTimes = async (numero_rodada, id_competicao) => {
 
@@ -805,28 +871,29 @@ const putMercadoAtletas = async () => {
     });
 
     for (x = 0; x < arrayMercadoAtletas.length; x++) {
-      
-        const atletas = {
-          atleta_id: arrayMercadoAtletas[x].atleta_id,
-          apelido: arrayMercadoAtletas[x].apelido,
-          foto: arrayMercadoAtletas[x].foto,
-          posicao_id: arrayMercadoAtletas[x].posicao_id,
-          clube_id: arrayMercadoAtletas[x].clube_id,
-        };
 
-        Atleta.findOne({ where: { atleta_id: atletas.atleta_id } }).then(listado => {
-          if (listado === null) {
-            const atleta = new Atleta({ ...atletas });
-            atleta.save();
-          } else {
-            Atleta.update({ apelido: atletas.apelido,
-              foto: atletas.foto,
-              posicao_id: atletas.posicao_id,
-              clube_id: atletas.clube_id
-            },
-              {where: {atleta_id: atletas.atleta_id }});
-          }
-        });
+      const atletas = {
+        atleta_id: arrayMercadoAtletas[x].atleta_id,
+        apelido: arrayMercadoAtletas[x].apelido,
+        foto: arrayMercadoAtletas[x].foto,
+        posicao_id: arrayMercadoAtletas[x].posicao_id,
+        clube_id: arrayMercadoAtletas[x].clube_id,
+      };
+
+      Atleta.findOne({ where: { atleta_id: atletas.atleta_id } }).then(listado => {
+        if (listado === null) {
+          const atleta = new Atleta({ ...atletas });
+          atleta.save();
+        } else {
+          Atleta.update({
+            apelido: atletas.apelido,
+            foto: atletas.foto,
+            posicao_id: atletas.posicao_id,
+            clube_id: atletas.clube_id
+          },
+            { where: { atleta_id: atletas.atleta_id } });
+        }
+      });
     }
 
     return arrayMercadoAtletas;
@@ -840,7 +907,6 @@ const putMercadoAtletas = async () => {
 module.exports = {
   putAtletasPontuados,
   putParciasAtletasTimes,
-  putBancoReservasTimes,
   putParciasTimes,
   getParciaisAtletasRodada,
   putMercadoAtletas
