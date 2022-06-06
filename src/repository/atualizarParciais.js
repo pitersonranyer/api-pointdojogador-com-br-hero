@@ -14,7 +14,6 @@ const BASE_URL = 'https://api.cartolafc.globo.com';
 var numeroRodada = 0;
 var mercado = 0;
 
-
 const putAtletasPontuados = async (numero_rodada, statusMercado) => {
 
   numeroRodada = numero_rodada;
@@ -38,11 +37,9 @@ const putAtletasPontuados = async (numero_rodada, statusMercado) => {
   /* atualizar substitução banco reservas  */
   await atualizarSubstituiçãoBancoReservas(numeroRodada);
 
-
 }
 
 const recuperarAtletasPontuados = async () => {
-
 
   if (mercado == 2) { // Fechado
     path = `/atletas/pontuados`;
