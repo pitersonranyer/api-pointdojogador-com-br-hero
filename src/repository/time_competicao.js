@@ -293,6 +293,14 @@ const getAtletasTimeCompeticao = async (time_id, numero_rodada) => {
     ", `B`.`apelido` " +
     ", `B`.`foto` " +
     ", `B`.`posicao_id` " +
+    ", CASE WHEN `B`.`posicao_id` = 1 THEN 'GOL' " +
+    "     WHEN `B`.`posicao_id` = 2 THEN 'LAT' " +
+    "     WHEN `B`.`posicao_id` = 3 THEN 'ZAG' " +
+    "     WHEN `B`.`posicao_id` = 4 THEN 'MEI' " +
+    "     WHEN `B`.`posicao_id` = 5 THEN 'ATA' " +
+    "     WHEN `B`.`posicao_id` = 6 THEN 'TEC' " +
+    "     ELSE 'OUT' " +
+    "END as `abreviacaoPosicao` " +
     ", `B`.`clube_id` " +
     ", `C`.`pontuacao` as `pontuacao_sem_capitao` " +
     ", CASE WHEN `A`.`atleta_capitao` = true THEN `C`.`pontuacao` * 2  " +
