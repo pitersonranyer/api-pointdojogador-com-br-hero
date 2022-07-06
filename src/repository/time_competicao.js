@@ -288,7 +288,7 @@ const getAtletasTimeCompeticao = async (time_id, numero_rodada) => {
   atletas = {};
 
   result = await sequelize.query("SELECT  `A`.`atleta_titular` " +
-    ", `A`.`atleta_capitao` " +
+    ", `A`.`atleta_capitao` as `capitao` " +
     ", `B`.`atleta_id` " +
     ", `B`.`apelido` " +
     ", `B`.`foto` " +
