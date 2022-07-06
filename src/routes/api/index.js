@@ -10,6 +10,7 @@ const timeCompeticaoRouter = require('./time_competicao');
 const timeCartolaRouter = require('./time_cartola');
 const dadoMestreCartolaRouter = require('./dadoMestreCartola');
 const atualizarParciaisRouter = require('./atualizarParciais')
+const atletasPontuadosRouter = require('./atleta_pontuado')
 
 
 
@@ -54,6 +55,13 @@ const endpoints = {
     atualizarParciais: {
       caminho: '/atualizarParciais'
     },
+
+    atletasPontuados: {
+      caminho: '/atleta_pontuado'
+    },
+
+
+    
    
   }
 };
@@ -70,5 +78,6 @@ Router.use('/time_competicao', timeCompeticaoRouter);
 Router.use('/time_cartola', timeCartolaRouter);
 Router.use('/dadoMestreCartola', dadoMestreCartolaRouter);
 Router.use('/atualizarParciais', atualizarParciaisRouter);
+Router.use('/atleta_pontuado', atletasPontuadosRouter);
 
 module.exports = Router;
