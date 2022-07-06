@@ -297,7 +297,7 @@ const getAtletasTimeCompeticao = async (time_id, numero_rodada) => {
     ", `C`.`pontuacao` as `pontuacao_sem_capitao` " +
     ", CASE WHEN `A`.`atleta_capitao` = true THEN `C`.`pontuacao` * 2  " +
     "      ELSE `C`.`pontuacao` end   " +
-    "   AS  `pontuacao_com_capitao` " +
+    "   AS  `pontuacao` " +
     "FROM `escalacao_time_rodada` `A` " +
     "    INNER JOIN `atleta` `B` " +
     "  ON  `B`.`atleta_id` = `A`.`atleta_id` " +
