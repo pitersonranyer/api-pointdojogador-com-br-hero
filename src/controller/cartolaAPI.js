@@ -1,6 +1,7 @@
 const { getTimesCartola,
   getMercadoStatus,
-  getTimeCartola
+  getTimeCartola,
+  getPartidas
  } = require('../repository/cartolaAPI');
 
 
@@ -26,9 +27,17 @@ const consultarTimeCartola = async (req, res, next) => {
     .catch(err => next(err));
 };
 
+const consultarPartidas = async (req, res, next) => {
+  nrRodada = req.params.nrRodada;
+  return getPartidas(nrRodada)
+    .then(time => res.json(time))
+    .catch(err => next(err));
+};
+
 
 module.exports = {
   listarTimesCartola,
   consultarMercadoStatus,
-  consultarTimeCartola
+  consultarTimeCartola,
+  consultarPartidas
 };
